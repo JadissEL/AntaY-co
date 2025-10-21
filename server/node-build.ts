@@ -14,7 +14,9 @@ app.use(express.static(distPath));
 
 // Handle React Router - serve index.html for all non-API routes
 // Use '/*' instead of '*' because path-to-regexp v8 rejects a lone '*'
-app.get("/*", (req, res) => {
+// Use a RegExp route to match any path. Using a RegExp avoids path-to-regexp parsing
+// errors that can occur with lone '*' or complex wildcard strings.
+app.get(/.*/, (req, res) => {
   // Don't serve index.html for API routes
   if (req.path.startsWith("/api/") || req.path.startsWith("/health")) {
     return res.status(404).json({ error: "API endpoint not found" });
