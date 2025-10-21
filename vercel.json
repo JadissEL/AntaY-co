@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "build": {
+    "env": {},
+    "command": "pnpm run build",
+    "outputDirectory": "dist/spa"
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
