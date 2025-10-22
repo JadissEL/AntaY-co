@@ -36,7 +36,21 @@ export const handleContact: RequestHandler = async (req, res) => {
 
     sgMail.setApiKey(apiKey);
 
+    const senderEmail = process.env.SENDGRID_FROM_EMAIL || "noreply@sendgrid.net";
+    const recipientEmail = "antayco.info@gmail.com";
+
     // Create formatted email template
+    const timestamp = new Date().toLocaleString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      timeZoneName: "short",
+    });
+
     const emailBody = `New Contact Form Submission:
 --------------------------------
 Name: ${fullName}
@@ -46,21 +60,16 @@ Message:
 ${message}
 --------------------------------
 Received via: ANTAY-CO Holding (https://antay-co.com)
-Timestamp: ${new Date().toLocaleString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      timeZoneName: "short",
-    })}`;
+Timestamp: ${timestamp}`;
 
     // Send email to recipient
     await sgMail.send({
-      to: "antayco.info@gmail.com",
-      from: "noreply@antay-co.com",
+      to: recipientEmail,
+      from: {
+        email: senderEmail,
+        name: "ANTAY-CO Contact Form",
+      },
+      replyTo: email,
       subject: `New Contact Form: ${subject}`,
       text: emailBody,
       html: `
@@ -76,16 +85,7 @@ Timestamp: ${new Date().toLocaleString("en-US", {
             </div>
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #666;">
               <p><strong>Received via:</strong> ANTAY-CO Holding (https://antay-co.com)</p>
-              <p><strong>Timestamp:</strong> ${new Date().toLocaleString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                timeZoneName: "short",
-              })}</p>
+              <p><strong>Timestamp:</strong> ${timestamp}</p>
             </div>
           </div>
         </div>
@@ -95,7 +95,10 @@ Timestamp: ${new Date().toLocaleString("en-US", {
     // Send confirmation email to user
     await sgMail.send({
       to: email,
-      from: "noreply@antay-co.com",
+      from: {
+        email: senderEmail,
+        name: "ANTAY-CO Holding",
+      },
       subject: "We received your message - ANTAY-CO Holding",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -103,7 +106,7 @@ Timestamp: ${new Date().toLocaleString("en-US", {
             <h2 style="color: #333; margin-top: 0;">Thank you for contacting us</h2>
             <p style="color: #666; line-height: 1.6;">
               Dear ${escapeHtml(fullName)},<br><br>
-              We have received your message and appreciate you taking the time to reach out to ANTAY-CO Holding. 
+              We have received your message and appreciate you taking the time to reach out to ANTAY-CO Holding.
               Our team will review your inquiry and get back to you as soon as possible.
             </p>
             <div style="background-color: #ffffff; padding: 15px; border-left: 4px solid #d4af37; margin: 20px 0;">
