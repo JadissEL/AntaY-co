@@ -87,7 +87,15 @@ export const Contact = () => {
         body: JSON.stringify(payload),
       });
 
-      const data: ContactResponse = await response.json();
+      let data: ContactResponse;
+
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error(
+          `Server error: ${response.status} ${response.statusText}`
+        );
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to send message");
