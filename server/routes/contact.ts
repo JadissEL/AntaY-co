@@ -129,9 +129,19 @@ Timestamp: ${timestamp}`;
     res.status(200).json(response);
   } catch (error) {
     console.error("Contact form error:", error);
+    let errorMessage = "Failed to send message. Please try again later.";
+
+    if (error instanceof Error) {
+      if (error.message.includes("403") || error.message.includes("Forbidden")) {
+        errorMessage = "Email service configuration error. Please contact support.";
+      } else {
+        errorMessage = error.message;
+      }
+    }
+
     const response: ContactResponse = {
       success: false,
-      error: "Failed to send message. Please try again later.",
+      error: errorMessage,
     };
     res.status(500).json(response);
   }
