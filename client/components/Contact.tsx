@@ -1,30 +1,114 @@
 import { useState } from "react";
+import { toast } from "sonner";
+import { ContactRequest, ContactResponse } from "@shared/api";
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
-    nom: "",
+    fullName: "",
     email: "",
+    subject: "",
     message: "",
   });
 
-  const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    } else if (formData.fullName.trim().length < 2) {
+      newErrors.fullName = "Full name must be at least 2 characters";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email address is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (!formData.subject.trim()) {
+      newErrors.subject = "Subject is required";
+    } else if (formData.subject.trim().length < 3) {
+      newErrors.subject = "Subject must be at least 3 characters";
+    }
+
+    if (!formData.message.trim()) {
+      newErrors.message = "Message is required";
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = "Message must be at least 10 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the form data to a server
-    setSubmitted(true);
-    setTimeout(() => {
-      setFormData({ nom: "", email: "", message: "" });
-      setSubmitted(false);
-    }, 3000);
+
+    if (!validateForm()) {
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const payload: ContactRequest = {
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+      };
+
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data: ContactResponse = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send message");
+      }
+
+      toast.success(data.message || "Message sent successfully!");
+      setFormData({
+        fullName: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+      setErrors({});
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      toast.error(errorMessage);
+      console.error("Contact form submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -49,17 +133,24 @@ export const Contact = () => {
 
         {/* Contact Form */}
         <form onSubmit={handleSubmit} className="space-y-6 mb-16">
-          {/* Name Field */}
+          {/* Full Name Field */}
           <div>
             <input
               type="text"
-              name="nom"
+              name="fullName"
               placeholder="Nom complet"
-              value={formData.nom}
+              value={formData.fullName}
               onChange={handleChange}
-              required
-              className="w-full bg-luxury-graphite/40 border border-luxury-gold/30 text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none focus:border-luxury-gold transition-colors"
+              disabled={isLoading}
+              className={`w-full bg-luxury-graphite/40 border text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none transition-colors ${
+                errors.fullName
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-luxury-gold/30 focus:border-luxury-gold"
+              } disabled:opacity-50`}
             />
+            {errors.fullName && (
+              <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
+            )}
           </div>
 
           {/* Email Field */}
@@ -70,9 +161,36 @@ export const Contact = () => {
               placeholder="Adresse email"
               value={formData.email}
               onChange={handleChange}
-              required
-              className="w-full bg-luxury-graphite/40 border border-luxury-gold/30 text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none focus:border-luxury-gold transition-colors"
+              disabled={isLoading}
+              className={`w-full bg-luxury-graphite/40 border text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none transition-colors ${
+                errors.email
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-luxury-gold/30 focus:border-luxury-gold"
+              } disabled:opacity-50`}
             />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
+          </div>
+
+          {/* Subject Field */}
+          <div>
+            <input
+              type="text"
+              name="subject"
+              placeholder="Sujet"
+              value={formData.subject}
+              onChange={handleChange}
+              disabled={isLoading}
+              className={`w-full bg-luxury-graphite/40 border text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none transition-colors ${
+                errors.subject
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-luxury-gold/30 focus:border-luxury-gold"
+              } disabled:opacity-50`}
+            />
+            {errors.subject && (
+              <p className="text-red-500 text-sm mt-1">{errors.subject}</p>
+            )}
           </div>
 
           {/* Message Field */}
@@ -82,19 +200,27 @@ export const Contact = () => {
               placeholder="Votre message"
               value={formData.message}
               onChange={handleChange}
-              required
+              disabled={isLoading}
               rows={5}
-              className="w-full bg-luxury-graphite/40 border border-luxury-gold/30 text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none focus:border-luxury-gold transition-colors resize-none"
+              className={`w-full bg-luxury-graphite/40 border text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none transition-colors resize-none ${
+                errors.message
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-luxury-gold/30 focus:border-luxury-gold"
+              } disabled:opacity-50`}
             />
+            {errors.message && (
+              <p className="text-red-500 text-sm mt-1">{errors.message}</p>
+            )}
           </div>
 
           {/* Submit Button */}
           <div className="flex justify-center">
             <button
               type="submit"
-              className="px-12 py-3 border-2 border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-luxury-black transition-all duration-300 font-semibold tracking-wider text-sm md:text-base"
+              disabled={isLoading}
+              className="px-12 py-3 border-2 border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-luxury-black transition-all duration-300 font-semibold tracking-wider text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitted ? "Message envoyé ✓" : "Envoyer"}
+              {isLoading ? "Envoi en cours..." : "Envoyer"}
             </button>
           </div>
         </form>
