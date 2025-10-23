@@ -91,17 +91,26 @@ export const Contact = () => {
         body: formDataToSend,
       });
 
+      console.log("Formspree raw response status:", response.status);
+      console.log("Formspree response headers:", response.headers);
+
       let data;
-      try {
-        data = await response.json();
-      } catch {
-        console.error("Failed to parse Formspree response");
-        throw new Error("Invalid server response");
+      const contentType = response.headers.get("content-type");
+
+      if (contentType && contentType.includes("application/json")) {
+        try {
+          data = await response.json();
+          console.log("Formspree JSON response:", data);
+        } catch (e) {
+          console.error("Failed to parse JSON:", e);
+          throw new Error("Invalid JSON response from server");
+        }
+      } else {
+        console.log("Response is not JSON, checking status code only");
+        data = { ok: response.ok };
       }
 
-      console.log("Formspree response:", { status: response.status, data });
-
-      if (data.ok === true || response.status === 200) {
+      if (data.ok === true || response.status === 200 || response.status === 201) {
         setSubmitState("success");
         toast.success("✅ Thank you! Your message has been sent successfully.");
         setFormData({
@@ -118,13 +127,17 @@ export const Contact = () => {
           setSubmitState("idle");
         }, 5000);
       } else {
-        throw new Error(data.error || data.message || `Formspree error: ${response.status}`);
+        throw new Error(
+          data.error ||
+            data.message ||
+            `Server error: ${response.status}`
+        );
       }
     } catch (error) {
       setSubmitState("error");
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error("⚠��� Something went wrong. Please try again later.");
+      toast.error("⚠️ Something went wrong. Please try again later.");
       console.error("Contact form submission error:", errorMessage, error);
 
       setTimeout(() => {
