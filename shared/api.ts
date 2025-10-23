@@ -10,23 +10,3 @@
 export interface DemoResponse {
   message: string;
 }
-
-/**
- * Contact form request type
- */
-export interface ContactRequest {
-  fullName: string;
-  email: string;
-  subject: string;
-  message: string;
-}
-
-/**
- * Contact form response type
- */
-export interface ContactResponse {
-  success: boolean;
-  message?: string;
-  error?: string;
-  details?: Record<string, unknown>;
-}
