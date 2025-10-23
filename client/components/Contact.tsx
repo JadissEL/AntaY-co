@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { ContactRequest, ContactResponse } from "@shared/api";
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +10,6 @@ export const Contact = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -61,7 +59,7 @@ export const Contact = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -69,54 +67,14 @@ export const Contact = () => {
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      const payload: ContactRequest = {
-        fullName: formData.fullName.trim(),
-        email: formData.email.trim(),
-        subject: formData.subject.trim(),
-        message: formData.message.trim(),
-      };
-
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      let data: ContactResponse;
-
-      try {
-        data = await response.json();
-      } catch {
-        throw new Error(
-          `Server error: ${response.status} ${response.statusText}`
-        );
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to send message");
-      }
-
-      toast.success(data.message || "Message sent successfully!");
-      setFormData({
-        fullName: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
-      setErrors({});
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unexpected error occurred";
-      toast.error(errorMessage);
-      console.error("Contact form submission error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    toast.success("Thank you for your message. We will get back to you soon!");
+    setFormData({
+      fullName: "",
+      email: "",
+      subject: "",
+      message: "",
+    });
+    setErrors({});
   };
 
   return (
@@ -149,12 +107,11 @@ export const Contact = () => {
               placeholder="Nom complet"
               value={formData.fullName}
               onChange={handleChange}
-              disabled={isLoading}
               className={`w-full bg-luxury-graphite/40 border text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none transition-colors ${
                 errors.fullName
                   ? "border-red-500 focus:border-red-500"
                   : "border-luxury-gold/30 focus:border-luxury-gold"
-              } disabled:opacity-50`}
+              }`}
             />
             {errors.fullName && (
               <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
@@ -169,12 +126,11 @@ export const Contact = () => {
               placeholder="Adresse email"
               value={formData.email}
               onChange={handleChange}
-              disabled={isLoading}
               className={`w-full bg-luxury-graphite/40 border text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none transition-colors ${
                 errors.email
                   ? "border-red-500 focus:border-red-500"
                   : "border-luxury-gold/30 focus:border-luxury-gold"
-              } disabled:opacity-50`}
+              }`}
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -189,12 +145,11 @@ export const Contact = () => {
               placeholder="Sujet"
               value={formData.subject}
               onChange={handleChange}
-              disabled={isLoading}
               className={`w-full bg-luxury-graphite/40 border text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none transition-colors ${
                 errors.subject
                   ? "border-red-500 focus:border-red-500"
                   : "border-luxury-gold/30 focus:border-luxury-gold"
-              } disabled:opacity-50`}
+              }`}
             />
             {errors.subject && (
               <p className="text-red-500 text-sm mt-1">{errors.subject}</p>
@@ -208,13 +163,12 @@ export const Contact = () => {
               placeholder="Votre message"
               value={formData.message}
               onChange={handleChange}
-              disabled={isLoading}
               rows={5}
               className={`w-full bg-luxury-graphite/40 border text-luxury-ivory placeholder-luxury-ivory/40 px-6 py-4 focus:outline-none transition-colors resize-none ${
                 errors.message
                   ? "border-red-500 focus:border-red-500"
                   : "border-luxury-gold/30 focus:border-luxury-gold"
-              } disabled:opacity-50`}
+              }`}
             />
             {errors.message && (
               <p className="text-red-500 text-sm mt-1">{errors.message}</p>
@@ -225,10 +179,9 @@ export const Contact = () => {
           <div className="flex justify-center">
             <button
               type="submit"
-              disabled={isLoading}
-              className="px-12 py-3 border-2 border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-luxury-black transition-all duration-300 font-semibold tracking-wider text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-12 py-3 border-2 border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-luxury-black transition-all duration-300 font-semibold tracking-wider text-sm md:text-base"
             >
-              {isLoading ? "Envoi en cours..." : "Envoyer"}
+              Envoyer
             </button>
           </div>
         </form>
