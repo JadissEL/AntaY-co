@@ -91,10 +91,17 @@ export const Contact = () => {
         body: formDataToSend,
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        console.error("Failed to parse Formspree response");
+        throw new Error("Invalid server response");
+      }
+
       console.log("Formspree response:", { status: response.status, data });
 
-      if (response.ok || response.status === 200) {
+      if (data.ok === true || response.status === 200) {
         setSubmitState("success");
         toast.success("✅ Thank you! Your message has been sent successfully.");
         setFormData({
@@ -111,13 +118,13 @@ export const Contact = () => {
           setSubmitState("idle");
         }, 5000);
       } else {
-        throw new Error(data.error || `Server returned status ${response.status}`);
+        throw new Error(data.error || data.message || `Formspree error: ${response.status}`);
       }
     } catch (error) {
       setSubmitState("error");
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error("⚠️ Something went wrong. Please try again later.");
+      toast.error("⚠��� Something went wrong. Please try again later.");
       console.error("Contact form submission error:", errorMessage, error);
 
       setTimeout(() => {
