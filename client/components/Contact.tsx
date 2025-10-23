@@ -15,7 +15,7 @@ export const Contact = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [submitState, setSubmitState] = useState<"idle" | "success" | "error">(
-    "idle"
+    "idle",
   );
 
   const validateForm = (): boolean => {
@@ -39,7 +39,10 @@ export const Contact = () => {
       newErrors.message = "Message must be at least 10 characters";
     }
 
-    if (formData.subject.trim().length > 0 && formData.subject.trim().length < 3) {
+    if (
+      formData.subject.trim().length > 0 &&
+      formData.subject.trim().length < 3
+    ) {
       newErrors.subject = "Subject must be at least 3 characters";
     }
 
@@ -48,7 +51,7 @@ export const Contact = () => {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -110,7 +113,11 @@ export const Contact = () => {
         data = { ok: response.ok };
       }
 
-      if (data.ok === true || response.status === 200 || response.status === 201) {
+      if (
+        data.ok === true ||
+        response.status === 200 ||
+        response.status === 201
+      ) {
         setSubmitState("success");
         toast.success("✅ Thank you! Your message has been sent successfully.");
         setFormData({
@@ -128,9 +135,7 @@ export const Contact = () => {
         }, 5000);
       } else {
         throw new Error(
-          data.error ||
-            data.message ||
-            `Server error: ${response.status}`
+          data.error || data.message || `Server error: ${response.status}`,
         );
       }
     } catch (error) {
@@ -240,7 +245,8 @@ export const Contact = () => {
           {/* Phone Field (Optional) */}
           <div className="animate-fadeIn" style={{ animationDelay: "0.3s" }}>
             <label className="block text-luxury-ivory/80 text-sm font-semibold mb-2">
-              Téléphone <span className="text-luxury-ivory/50 text-xs">(optionnel)</span>
+              Téléphone{" "}
+              <span className="text-luxury-ivory/50 text-xs">(optionnel)</span>
             </label>
             <input
               type="tel"
@@ -256,7 +262,8 @@ export const Contact = () => {
           {/* Subject Field (Optional) */}
           <div className="animate-fadeIn" style={{ animationDelay: "0.4s" }}>
             <label className="block text-luxury-ivory/80 text-sm font-semibold mb-2">
-              Sujet <span className="text-luxury-ivory/50 text-xs">(optionnel)</span>
+              Sujet{" "}
+              <span className="text-luxury-ivory/50 text-xs">(optionnel)</span>
             </label>
             <input
               type="text"
@@ -304,7 +311,10 @@ export const Contact = () => {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-center pt-4 animate-fadeIn" style={{ animationDelay: "0.6s" }}>
+          <div
+            className="flex justify-center pt-4 animate-fadeIn"
+            style={{ animationDelay: "0.6s" }}
+          >
             <button
               type="submit"
               disabled={isLoading}
@@ -367,7 +377,8 @@ export const Contact = () => {
                 Message envoyé avec succès!
               </h3>
               <p className="text-luxury-ivory/70">
-                Merci de nous avoir contactés. Nous vous répondrons très bientôt.
+                Merci de nous avoir contactés. Nous vous répondrons très
+                bientôt.
               </p>
             </div>
           </div>
@@ -400,11 +411,7 @@ export const Contact = () => {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 bg-luxury-graphite/40 border border-luxury-gold/30 rounded-lg text-luxury-gold hover:text-luxury-ivory hover:bg-luxury-gold/10 hover:border-luxury-gold transition-all duration-300 group"
             >
-              <svg
-                className="w-5 h-5"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0m0 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
               </svg>
               <span className="font-semibold">Profil Google Vérifié</span>
@@ -480,7 +487,9 @@ export const Contact = () => {
           {/* Return to Top Button */}
           <button
             onClick={() => {
-              document.getElementById("hero")?.scrollIntoView({ behavior: "smooth" });
+              document
+                .getElementById("hero")
+                ?.scrollIntoView({ behavior: "smooth" });
             }}
             className="inline-flex items-center justify-center w-12 h-12 border border-luxury-gold/40 hover:border-luxury-gold text-luxury-gold hover:text-luxury-ivory transition-all duration-300 group rounded-lg"
           >
